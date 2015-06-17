@@ -30,7 +30,7 @@ public interface ClassResolver {
 
 	/** Stores the specified registration.
 	 * @see Kryo#register(Registration) */
-	public Registration register (Registration registration);
+	public <T> Registration<T> register (Registration<T> registration);
 
 	/** Called when an unregistered type is encountered and {@link Kryo#setRegistrationRequired(boolean)} is false. */
 	public Registration registerImplicit (Class type);
@@ -44,7 +44,7 @@ public interface ClassResolver {
 	/** Writes a class and returns its registration.
 	 * @param type May be null.
 	 * @return Will be null if type is null. */
-	public Registration writeClass (Output output, Class type);
+	public <T> Registration<T> writeClass (Output output, Class<T> type);
 
 	/** Reads a class and returns its registration.
 	 * @return May be null. */

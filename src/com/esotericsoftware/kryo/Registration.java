@@ -26,13 +26,13 @@ import static com.esotericsoftware.minlog.Log.*;
 
 /** Describes the {@link Serializer} and class ID to use for a class.
  * @author Nathan Sweet <misc@n4te.com> */
-public class Registration {
-	private final Class type;
+public class Registration<T> {
+	private final Class<T> type;
 	private final int id;
-	private Serializer serializer;
-	private ObjectInstantiator instantiator;
+	private Serializer<T> serializer;
+	private ObjectInstantiator<T> instantiator;
 
-	public Registration (Class type, Serializer serializer, int id) {
+	public Registration (Class<T> type, Serializer<T> serializer, int id) {
 		if (type == null) throw new IllegalArgumentException("type cannot be null.");
 		if (serializer == null) throw new IllegalArgumentException("serializer cannot be null.");
 		this.type = type;
@@ -40,7 +40,7 @@ public class Registration {
 		this.id = id;
 	}
 
-	public Class getType () {
+	public Class<T> getType () {
 		return type;
 	}
 
@@ -54,19 +54,19 @@ public class Registration {
 		return serializer;
 	}
 
-	public void setSerializer (Serializer serializer) {
+	public void setSerializer (Serializer<T> serializer) {
 		if (serializer == null) throw new IllegalArgumentException("serializer cannot be null.");
 		this.serializer = serializer;
 		if (TRACE) trace("kryo", "Update registered serializer: " + type.getName() + " (" + serializer.getClass().getName() + ")");
 	}
 
 	/** @return May be null if not yet set. */
-	public ObjectInstantiator getInstantiator () {
+	public ObjectInstantiator<T> getInstantiator () {
 		return instantiator;
 	}
 
 	/** Sets the instantiator that will create a new instance of the type in {@link Kryo#newInstance(Class)}. */
-	public void setInstantiator (ObjectInstantiator instantiator) {
+	public void setInstantiator (ObjectInstantiator<T> instantiator) {
 		if (instantiator == null) throw new IllegalArgumentException("instantiator cannot be null.");
 		this.instantiator = instantiator;
 	}

@@ -57,7 +57,7 @@ public class Kryo {
 	static private final int NO_REF = -2;
 
 	private SerializerFactory defaultSerializer = new ReflectionSerializerFactory(FieldSerializer.class);
-	private final ArrayList<DefaultSerializerEntry> defaultSerializers = new ArrayList(32);
+	private final ArrayList<DefaultSerializerEntry> defaultSerializers = new ArrayList<DefaultSerializerEntry>(32);
 	private final int lowPriorityDefaultSerializerCount;
 
 	private final ClassResolver classResolver;
@@ -69,7 +69,8 @@ public class Kryo {
 	private int depth, maxDepth = Integer.MAX_VALUE;
 	private boolean autoReset = true;
 	private volatile Thread thread;
-	private ObjectMap context, graphContext;
+	private ObjectMap context;
+	private ObjectMap graphContext;
 
 	private ReferenceResolver referenceResolver;
 	private final IntArray readReferenceIds = new IntArray(0);
@@ -839,7 +840,7 @@ public class Kryo {
 	/** Returns a deep copy of the object using the specified serializer. Serializers for the classes involved must support
 	 * {@link Serializer#copy(Kryo, Object)}.
 	 * @param object May be null. */
-	public <T> T copy (T object, Serializer serializer) {
+	public <T> T copy (T object, Serializer<T> serializer) {
 		if (object == null) return null;
 		if (copyShallow) return object;
 		copyDepth++;
@@ -892,7 +893,7 @@ public class Kryo {
 	/** Returns a shallow copy of the object using the specified serializer. Serializers for the classes involved must support
 	 * {@link Serializer#copy(Kryo, Object)}.
 	 * @param object May be null. */
-	public <T> T copyShallow (T object, Serializer serializer) {
+	public <T> T copyShallow (T object, Serializer<T> serializer) {
 		if (object == null) return null;
 		copyDepth++;
 		copyShallow = true;
@@ -1021,7 +1022,7 @@ public class Kryo {
 	 * a new one is set using {@link #newInstantiator(Class)}. */
 	public <T> T newInstance (Class<T> type) {
 		Registration registration = getRegistration(type);
-		ObjectInstantiator instantiator = registration.getInstantiator();
+		ObjectInstantiator<T> instantiator = registration.getInstantiator();
 		if (instantiator == null) {
 			instantiator = newInstantiator(type);
 			registration.setInstantiator(instantiator);
@@ -1030,8 +1031,8 @@ public class Kryo {
 	}
 
 	/** Name/value pairs that are available to all serializers. */
-	public ObjectMap getContext () {
-		if (context == null) context = new ObjectMap();
+	public ObjectMap getContext() {
+		if (context == null) context = new ObjectMap<String, Object>();
 		return context;
 	}
 
@@ -1161,7 +1162,7 @@ public class Kryo {
 			return fallbackStrategy;
 		}
 
-		public ObjectInstantiator newInstantiatorOf (final Class type) {
+		public <T> ObjectInstantiator<T> newInstantiatorOf (final Class<T> type) {
 			if (!Util.isAndroid) {
 				// Use ReflectASM if the class is not a non-static member class.
 				Class enclosingType = type.getEnclosingClass();
@@ -1169,9 +1170,9 @@ public class Kryo {
 					&& !Modifier.isStatic(type.getModifiers());
 				if (!isNonStaticMemberClass) {
 					try {
-						final ConstructorAccess access = ConstructorAccess.get(type);
-						return new ObjectInstantiator() {
-							public Object newInstance () {
+						final ConstructorAccess<T> access = ConstructorAccess.get(type);
+						return new ObjectInstantiator<T>() {
+							public T newInstance () {
 								try {
 									return access.newInstance();
 								} catch (Exception ex) {
@@ -1192,9 +1193,9 @@ public class Kryo {
 					ctor = type.getDeclaredConstructor((Class[])null);
 					ctor.setAccessible(true);
 				}
-				final Constructor constructor = ctor;
-				return new ObjectInstantiator() {
-					public Object newInstance () {
+				final Constructor<T> constructor = (Constructor<T>)ctor;
+				return new ObjectInstantiator<T>() {
+					public T newInstance () {
 						try {
 							return constructor.newInstance();
 						} catch (Exception ex) {

@@ -19,15 +19,15 @@
 
 package com.esotericsoftware.kryo.util;
 
-import static com.esotericsoftware.kryo.util.Util.*;
-import static com.esotericsoftware.minlog.Log.*;
-
 import com.esotericsoftware.kryo.ClassResolver;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+
+import static com.esotericsoftware.kryo.util.Util.*;
+import static com.esotericsoftware.minlog.Log.*;
 
 /** Resolves classes by ID or by fully qualified class name.
  * @author Nathan Sweet <misc@n4te.com> */
